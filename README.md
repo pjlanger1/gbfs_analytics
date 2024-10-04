@@ -130,7 +130,7 @@ pip install gbfs_analytics
 Initialize the GBFS Manager
 
 ```python
-from gbfs_analytics import GBFSManager
+from src.gbfs_analytics import GBFSManager
 
 # Create a manager instance
 manager = GBFSManager()
@@ -143,13 +143,16 @@ print(systems)
 dc_feed = manager.get_feed('dc')
 
 # Perform a snapshot for station status data
-#Perform snapshot allows you to select:
+# Perform snapshot allows you to select:
 # a) an interval -> snapshot every x seconds.
 # b) a # of iterations -> repeat the above y times.
 # c) save_mode will save the raw snapshots of the feed to your working directory.
 # d) and most importantly feed [station_status, free_bike_status]
 
-dc_feed.perform_snapshot(feed='station_status', interval=600, iterations=6, save_mode = True)
+dc_feed.perform_snapshot(feed='station_status',
+    interval=600,
+    iterations=6,
+    save_mode=True)
 ```
 
 ## Coverage

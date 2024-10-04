@@ -1,0 +1,57 @@
+[tool.black]
+line-length = 88
+target-version = ["py311"]
+
+[tool.coverage.paths]
+source = ["src", "*/site-packages"]
+
+[tool.coverage.run]
+branch = true
+source = ["src"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 0  # TODO: set to 80 when ready
+exclude_lines = [
+    "if __name__ == .__main__.:"
+]
+
+[tool.poetry]
+name = "gbfs_analytics"
+version = "0.1.5"
+description = "Tools for polling and analytics on Generalized Bikeshare Feed Specification (GBFS) v2.3 feeds"
+authors = ["Transit Ventures Limited <hello@bikewatch.nyc>"]
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",  # Apache2.0
+    "Operating System :: OS Independent",
+]
+license = "Apache-2.0"
+
+[tool.poetry.urls]
+homepage = "https://www.bikewatch.nyc"
+repository = "https://github.com/pjlanger1/gbfs_analytics"
+
+[tool.poetry.dependencies]
+python = ">=3.11,<3.12"
+requests = "^2.28.2"
+schedule = "^1.0.0"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.1.0"
+coverage = {version = "^7.5.3", extras = ["toml"]}
+flake8 = "^7.0.0"
+flake8-bandit = "^4.1.1"
+flake8-black = "^0.3.6"
+flake8-bugbear = "^24.4.26"
+flake8-import-order = "^0.18.2"
+nox = "^2024.4.15"
+pytest = "^7.4.3"
+pytest-asyncio = "^0.23.6"
+pytest-cov = "^5.0.0"
+requests-mock = "^1.10.0"
+
+[build-system]
+requires = ["poetry>=1.6.1"]
+build-backend = "poetry.core.masonry.api"
