@@ -1,0 +1,22 @@
+name: Tests
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+jobs:
+  test:
+    container:
+      image: python:3.12-bullseye
+    steps:
+      - name: Checkout codebase
+        uses: actions/checkout@v3
+      - name: Install poetry
+        run: |
+          pip install --upgrade pip
+          pip install --upgrade poetry
+          poetry install --with=test
+      - name: Test
+        run: poetry run nox -s tests

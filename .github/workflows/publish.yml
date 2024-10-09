@@ -1,0 +1,23 @@
+name: Publish
+on:
+  workflow_run:
+    workflows: ["Lint", "Tests"]
+    branches: [main]
+    types:
+      - completed
+
+jobs:
+  publish:
+    container:
+      image: python:3.12-bullseye
+    steps:
+      - name: Checkout codebase
+        uses: actions/checkout@v3
+      - name: Install poetry
+        run: |
+          pip install --upgrade pip
+          pip install --upgrade poetry
+      - name: Config Poetry
+        run: poetry config pypi-token.pypi "${{ secrets.PYPI_TOKEN }}"
+      - name: Publish
+        run: poetry publish --build
