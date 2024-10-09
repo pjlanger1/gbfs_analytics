@@ -1,7 +1,7 @@
 # gbfs_manager.py
 
 # local modules
-from .gbfs_feed import gbfs_feed
+from .gbfsfeed import GbfsFeed
 
 
 class GBFSManager:
@@ -25,7 +25,7 @@ class GBFSManager:
         """Return a gbfs_feed instance for the given city if available."""
         if city not in self.systems:
             raise ValueError(f"City {city} is not available in the systems list.")
-        return gbfs_feed(city, self.systems[city])
+        return GbfsFeed(city, self.systems[city])
 
     def list_available_systems(self):
         """Return a list of available systems."""

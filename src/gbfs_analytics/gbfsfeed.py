@@ -121,7 +121,7 @@ logging.basicConfig(
 )
 
 
-class gbfs_feed:
+class GbfsFeed:
     def __init__(self, sysinit, baseurl):
         self.logger = logging.getLogger(__name__)
         self.system = sysinit
