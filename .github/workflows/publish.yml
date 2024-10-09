@@ -22,7 +22,9 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install --upgrade poetry
-      - name: Config Poetry
-        run: poetry config pypi-token.pypi "${{ secrets.PYPI_TOKEN }}"
+      - name: Build
+        run: poetry build
       - name: Publish
-        run: poetry publish --build
+        run: |
+          poetry config pypi-token.pypi "${{ secrets.PYPI_TOKEN }}"
+          poetry publish
