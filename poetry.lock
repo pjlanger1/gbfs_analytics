@@ -2,13 +2,13 @@
 
 [[package]]
 name = "argcomplete"
-version = "3.5.0"
+version = "3.5.1"
 description = "Bash tab completion for argparse"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "argcomplete-3.5.0-py3-none-any.whl", hash = "sha256:d4bcf3ff544f51e16e54228a7ac7f486ed70ebf2ecfe49a63a91171c76bf029b"},
-    {file = "argcomplete-3.5.0.tar.gz", hash = "sha256:4349400469dccfb7950bb60334a680c58d88699bff6159df61251878dc6bf74b"},
+    {file = "argcomplete-3.5.1-py3-none-any.whl", hash = "sha256:1a1d148bdaa3e3b93454900163403df41448a248af01b6e849edc5ac08e6c363"},
+    {file = "argcomplete-3.5.1.tar.gz", hash = "sha256:eb1ee355aa2557bd3d0145de7b06b2a45b0ce461e1e7813f5d066039ab4177b4"},
 ]
 
 [package.extras]
@@ -911,4 +911,4 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<3.12"
-content-hash = "84fe5965ddb6d0c3213a86f2a2744859d0613bd2c4fadfe1d06f9b409a37fe4c"
+content-hash = "68663f6b2ba3b34ed94f340046e03981c73eee6e4cd03cb102972884ace4d601"
