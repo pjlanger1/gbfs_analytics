@@ -38,7 +38,7 @@ python = ">=3.11,<3.12"
 requests = "^2.28.2"
 schedule = "^1.0.0"
 
-[tool.poetry.group.dev.dependencies]
+[tool.poetry.group.test.dependencies]
 black = "^23.1.0"
 coverage = {version = "^7.5.3", extras = ["toml"]}
 flake8 = "^7.0.0"

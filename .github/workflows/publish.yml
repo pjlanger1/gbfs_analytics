@@ -8,8 +8,10 @@ on:
 
 jobs:
   publish:
+    runs-on:
+      - ubuntu-latest
     container:
-      image: python:3.12-bullseye
+      image: python:3.11-bullseye
     steps:
       - name: Checkout codebase
         uses: actions/checkout@v3
