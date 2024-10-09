@@ -18,7 +18,7 @@ exclude_lines = [
 
 [tool.poetry]
 name = "gbfs_analytics"
-version = "0.1.5"
+version = "0.1.6"
 description = "Tools for polling and analytics on Generalized Bikeshare Feed Specification (GBFS) v2.3 feeds"
 authors = ["Transit Ventures Limited <hello@bikewatch.nyc>"]
 readme = "README.md"
