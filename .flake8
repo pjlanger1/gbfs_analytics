@@ -1,0 +1,41 @@
+[flake8]
+black-config = ./pyproject.toml
+exclude =
+    .git,
+    __pycache__,
+    __init__.py
+max-line-length = 88
+ignore =
+    # Allow whitespace before ":".
+    E203,
+    # Ignore line too long.
+    E501,
+    # Ignore line break before binary operator.
+    W503,
+    # Ignore spelling errors in signatures.
+    S301,
+    # Don't complain about pickles and security.
+    S403,
+    # Allow performing function calls in argument defaults for fastapi Depends()
+    B008,
+    # Allow requests calls without timeout
+    S113,
+    # Don't limit zip
+    B905
+select =
+    B,
+    B9,
+    BLK,
+    C,
+    E,
+    F,
+    I,
+    S,
+    W
+application-import-names = src.gbfs_analytics, tests
+import-order-style = pep8
+per-file-ignores =
+    # S101 - Don't complain about asserts for tests.
+    # S106 - Don't complain about hardcoded passwords mocked for tests.
+    tests/*:S101, S105, S106
+    research/*:S101
