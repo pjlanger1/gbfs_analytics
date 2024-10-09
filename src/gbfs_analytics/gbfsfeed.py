@@ -112,6 +112,17 @@ METADATA_FIELDS = {
         ],
         "free_bike_status": [None],
     },
+     "cdmx": {
+        "station_status": [
+            "station_id",
+            "is_charging",
+            "is_installed",
+            "is_renting",
+            "is_returning",
+            "eightd_has_available_keys"
+        ],
+        "free_bike_status": [None],
+    }
 }
 
 
