@@ -9,111 +9,12 @@ from datetime import datetime
 # third-party packages
 import requests
 import schedule
+from pydantic import TypeAdapter
 
 # local modules
+from .config import METADATA_FIELDS
+from .data_structures import Station
 from .gbfs_timeseries import GBFSTimeSeries
-
-METADATA_FIELDS = {
-    "dc": {
-        "station_status": [
-            "is_installed",
-            "station_id",
-            "is_returning",
-            "is_renting",
-        ],
-        "free_bike_status": [
-            "vehicle_type_id",
-            "rental_uris",
-            "bike_id",
-            "is_reserved",
-            "is_disabled",
-        ],
-    },
-    "nyc": {
-        "station_status": ["is_returning", "station_id", "is_renting", "is_installed"],
-        "free_bike_status": [None],
-    },
-    "boston": {
-        "station_status": [
-            "eightd_has_available_keys",
-            "legacy_id",
-            "is_renting",
-            "is_returning",
-            "is_installed",
-            "station_id",
-        ],
-        "free_bike_status": [None],
-    },
-    "chicago": {
-        "station_status": ["station_id", "is_returning", "is_installed", "is_renting"],
-        "free_bike_status": [
-            "is_disabled",
-            "rental_uris",
-            "is_reserved",
-            "bike_id",
-            "vehicle_type_id",
-        ],
-    },
-    "sf": {
-        "station_status": ["is_renting", "is_returning", "is_installed", "station_id"],
-        "free_bike_status": [
-            "bike_id",
-            "is_reserved",
-            "vehicle_type_id",
-            "rental_uris",
-            "is_disabled",
-        ],
-    },
-    "portland": {
-        "station_status": ["is_returning", "station_id", "is_installed", "s_renting"],
-        "free_bike_status": [
-            "is_disabled",
-            "rental_uris",
-            "vehicle_type_id",
-            "bike_id",
-            "is_reserved",
-        ],
-    },
-    "denver": {
-        "station_status": ["is_installed", "station_id", "is_returning", "is_renting"],
-        "free_bike_status": [
-            "is_reserved",
-            "bike_id",
-            "vehicle_type_id",
-            "is_disabled",
-        ],
-    },
-    "columbus": {
-        "station_status": ["is_renting", "is_returning", "station_id", "is_installed"],
-        "free_bike_status": [
-            "is_reserved",
-            "is_disabled",
-            "rental_uris",
-            "vehicle_type_id",
-            "bike_id",
-        ],
-    },
-    "la": {
-        "station_status": ["is_returning", "is_renting", "is_installed", "station_id"],
-        "free_bike_status": [None],
-    },
-    "phila": {
-        "station_status": ["is_returning", "is_renting", "is_installed", "station_id"],
-        "free_bike_status": [None],
-    },
-    "toronto": {
-        "station_status": [
-            "station_id",
-            "is_charging_station",
-            "status",
-            "is_installed",
-            "is_renting",
-            "is_returning",
-        ],
-        "free_bike_status": [None],
-    },
-}
-
 
 # Setup logging
 logging.basicConfig(
@@ -122,21 +23,26 @@ logging.basicConfig(
 
 
 class GbfsFeed:
-    def __init__(self, sysinit, baseurl):
+    def __init__(self, city, baseurl):
         self.logger = logging.getLogger(__name__)
-        self.system = sysinit
         self.baseurl = baseurl
-        self.city = sysinit
+        self.city = city
         self.cache = {}
         self.ttls = {}
         self.scheduled_tasks = {}
         self.timeseries_store = {}
         self.stop_time = None
+        type_adapter = TypeAdapter(Station)
+        stations = {
+            city: type_adapter.validate_python(metadata).model_dump()
+            for city, metadata in METADATA_FIELDS.items()
+        }
+        self.metadata = stations.get(city)
 
         try:
             self.ttl, self.vers, self.urls = self.get_feed_info()
         except Exception as e:
-            self.logger.error(f"Failed to initialize GBFS feed for {sysinit}: {e}")
+            self.logger.error(f"Failed to initialize GBFS feed for {city}: {e}")
             self.ttl, self.vers, self.urls = None, None, {}
 
     def get_feed_info(self):
@@ -155,7 +61,7 @@ class GbfsFeed:
 
     def get_metadata_fields(self, feed):
         """Retrieve metadata fields based on city and feed."""
-        return METADATA_FIELDS.get(self.city, {}).get(feed, [])
+        return self.metadata.get(feed, [])
 
     def safe_request_handler(self, url, expect_json=True, use_cache=True):
         headers = {}
