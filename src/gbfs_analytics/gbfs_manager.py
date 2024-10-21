@@ -19,6 +19,7 @@ class GBFSManager:
             "la": "https://gbfs.bcycle.com/bcycle_lametro/gbfs.json",
             "phila": "https://gbfs.bcycle.com/bcycle_indego/gbfs.json",
             "toronto": "https://tor.publicbikesystem.net/customer/gbfs/v2/gbfs.json",
+            "cdmx":"https://gbfs.mex.lyftbikes.com/gbfs/gbfs.json"
         }
 
     def get_feed(self, city: str) -> GbfsFeed:
