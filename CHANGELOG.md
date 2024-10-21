@@ -8,7 +8,7 @@ Versioning in this project follows [Semantic Versioning](https://semserver.org/s
 
 --------
 
-## [0.0.0] - (10/04/2024)
+## [0.1.5] - (10/04/2024)
 ### Added
 - Init commit of all clients and tools.
 
