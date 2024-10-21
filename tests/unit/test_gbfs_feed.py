@@ -5,5 +5,5 @@ from src.gbfs_analytics.gbfsfeed import GbfsFeed
 
 
 def test_gbfs_feed_init():
-    gbfs_feed = GbfsFeed(sysinit="", baseurl="")
+    gbfs_feed = GbfsFeed(city="", baseurl="")
     assert gbfs_feed is not None

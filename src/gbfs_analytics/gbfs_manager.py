@@ -33,7 +33,7 @@ class GBFSManager:
         """
         if city not in self.systems:
             raise ValueError(f"City {city} is not available in the systems list.")
-        return GbfsFeed(sysinit=city, baseurl=self.systems[city])
+        return GbfsFeed(city=city, baseurl=self.systems[city])
 
     def list_available_systems(self) -> list:
         """

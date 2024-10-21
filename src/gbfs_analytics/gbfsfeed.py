@@ -5,137 +5,42 @@ from datetime import datetime, timezone
 from json import dump, JSONDecodeError
 from logging import Logger
 from time import sleep, time, ctime
+from typing import Type
 
 # third-party packages
 import requests
 from schedule import clear, every, run_pending, CancelJob
+from pydantic import TypeAdapter
 
 # local modules
+from .config import METADATA_FIELDS
+from .data_structures import Station
 from .gbfs_timeseries import GBFSTimeSeries
 from .utils import get_logger
 
-METADATA_FIELDS = {
-    "dc": {
-        "station_status": [
-            "is_installed",
-            "station_id",
-            "is_returning",
-            "is_renting",
-        ],
-        "free_bike_status": [
-            "vehicle_type_id",
-            "rental_uris",
-            "bike_id",
-            "is_reserved",
-            "is_disabled",
-        ],
-    },
-    "nyc": {
-        "station_status": ["is_returning", "station_id", "is_renting", "is_installed"],
-        "free_bike_status": [None],
-    },
-    "boston": {
-        "station_status": [
-            "eightd_has_available_keys",
-            "legacy_id",
-            "is_renting",
-            "is_returning",
-            "is_installed",
-            "station_id",
-        ],
-        "free_bike_status": [None],
-    },
-    "chicago": {
-        "station_status": ["station_id", "is_returning", "is_installed", "is_renting"],
-        "free_bike_status": [
-            "is_disabled",
-            "rental_uris",
-            "is_reserved",
-            "bike_id",
-            "vehicle_type_id",
-        ],
-    },
-    "sf": {
-        "station_status": ["is_renting", "is_returning", "is_installed", "station_id"],
-        "free_bike_status": [
-            "bike_id",
-            "is_reserved",
-            "vehicle_type_id",
-            "rental_uris",
-            "is_disabled",
-        ],
-    },
-    "portland": {
-        "station_status": ["is_returning", "station_id", "is_installed", "s_renting"],
-        "free_bike_status": [
-            "is_disabled",
-            "rental_uris",
-            "vehicle_type_id",
-            "bike_id",
-            "is_reserved",
-        ],
-    },
-    "denver": {
-        "station_status": ["is_installed", "station_id", "is_returning", "is_renting"],
-        "free_bike_status": [
-            "is_reserved",
-            "bike_id",
-            "vehicle_type_id",
-            "is_disabled",
-        ],
-    },
-    "columbus": {
-        "station_status": ["is_renting", "is_returning", "station_id", "is_installed"],
-        "free_bike_status": [
-            "is_reserved",
-            "is_disabled",
-            "rental_uris",
-            "vehicle_type_id",
-            "bike_id",
-        ],
-    },
-    "la": {
-        "station_status": ["is_returning", "is_renting", "is_installed", "station_id"],
-        "free_bike_status": [None],
-    },
-    "phila": {
-        "station_status": ["is_returning", "is_renting", "is_installed", "station_id"],
-        "free_bike_status": [None],
-    },
-    "toronto": {
-        "station_status": [
-            "station_id",
-            "is_charging_station",
-            "status",
-            "is_installed",
-            "is_renting",
-            "is_returning",
-        ],
-        "free_bike_status": [None],
-    },
-}
-
 
 class GbfsFeed:
-    def __init__(
-        self, sysinit: str, baseurl: str, logger: Logger | None = None
-    ) -> None:
+    def __init__(self, city: str, baseurl: str, logger: Logger | None = None) -> None:
         if logger is None:
             self.logger = get_logger()
-        self.system = sysinit
         self.baseurl = baseurl
-        self.city = sysinit
+        self.city = city
         self.cache = {}
         self.ttls = {}
         self.scheduled_tasks = {}
         self.timeseries_store = {}
         self.stop_time = None
-        self.metadata_fields = METADATA_FIELDS
+        type_adapter = TypeAdapter(Station)
+        stations = {
+            city: type_adapter.validate_python(metadata).model_dump()
+            for city, metadata in METADATA_FIELDS.items()
+        }
+        self.metadata_fields = stations.get(city)
 
         try:
             self.ttl, self.vers, self.urls = self.get_feed_info()
         except Exception as e:
-            self.logger.error(f"Failed to initialize GBFS feed for {sysinit}: {e}")
+            self.logger.error(f"Failed to initialize GBFS feed for {city}: {e}")
             self.ttl, self.vers, self.urls = None, None, {}
 
     def get_feed_info(self) -> tuple[int, str, dict]:
@@ -167,7 +72,7 @@ class GbfsFeed:
         Returns:
 
         """
-        return self.metadata_fields.get(self.city, {}).get(feed, [])
+        return self.metadata_fields.get(feed, [])
 
     def safe_request_handler(
         self, url: str, expect_json: bool = True, use_cache: bool = True
@@ -229,13 +134,15 @@ class GbfsFeed:
         )
         # Store instance in dictionary
         self.timeseries_store[feed] = timeseries
-        # Mutable counter to track iterations
-        task_counter = [0]
+        task_counter = 0
 
         def task() -> type[CancelJob] | None:
+            # Set variables as non-local
+            nonlocal task_counter
+
             # Log the start of the task
             self.logger.info(
-                f"Task started for {feed}: Iteration {task_counter[0] + 1}/{iterations}"
+                f"Task started for {feed}: Iteration {task_counter + 1}/{iterations}"
             )
             current_data = self.safe_request_handler(url=self.urls[feed])
             if current_data:
@@ -252,15 +159,15 @@ class GbfsFeed:
                         + "Z"
                     )
                     with open(
-                        f"{feed}_snapshot_{task_counter[0]}_{last_reported}.json", "w"
+                        f"{feed}_snapshot_{task_counter}_{last_reported}.json", "w"
                     ) as f:
                         dump(obj=current_data, fp=f, indent=4)
                     # Log snapshot timing
                     self.logger.info(f"Snapshot for {feed} saved at {ctime()}")
 
             # Increment the counter after each iteration
-            task_counter[0] += 1
-            if task_counter[0] >= iterations:
+            task_counter += 1
+            if task_counter >= iterations:
                 # Log when task is stopping
                 self.logger.info(
                     f"Maximum iterations reached for {feed}. Stopping scheduler."
@@ -278,7 +185,7 @@ class GbfsFeed:
         # Graceful shutdown handling with try-except-finally
         try:
             # Start a loop to keep the scheduler running
-            while task_counter[0] < iterations:
+            while task_counter < iterations:
                 # Run the scheduled jobs
                 run_pending()
                 # Sleep for a short duration to prevent high CPU usage
@@ -316,7 +223,7 @@ class GbfsFeed:
         task_counter = 0
         old_data = {}
 
-        def task() -> CancelJob:
+        def task() -> Type[CancelJob]:
             # Set variables as non-local
             nonlocal task_counter, old_data
 
