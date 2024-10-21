@@ -20,9 +20,7 @@ from .utils import get_logger
 
 
 class GbfsFeed:
-    def __init__(
-        self, city: str, baseurl: str, logger: Logger | None = None
-    ) -> None:
+    def __init__(self, city: str, baseurl: str, logger: Logger | None = None) -> None:
         if logger is None:
             self.logger = get_logger()
         self.baseurl = baseurl
