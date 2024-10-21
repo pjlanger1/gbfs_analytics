@@ -136,13 +136,15 @@ class GbfsFeed:
         )
         # Store instance in dictionary
         self.timeseries_store[feed] = timeseries
-        # Mutable counter to track iterations
-        task_counter = [0]
+        task_counter = 0
 
         def task() -> type[CancelJob] | None:
+            # Set variables as non-local
+            nonlocal task_counter
+
             # Log the start of the task
             self.logger.info(
-                f"Task started for {feed}: Iteration {task_counter[0] + 1}/{iterations}"
+                f"Task started for {feed}: Iteration {task_counter + 1}/{iterations}"
             )
             current_data = self.safe_request_handler(url=self.urls[feed])
             if current_data:
@@ -159,15 +161,15 @@ class GbfsFeed:
                         + "Z"
                     )
                     with open(
-                        f"{feed}_snapshot_{task_counter[0]}_{last_reported}.json", "w"
+                        f"{feed}_snapshot_{task_counter}_{last_reported}.json", "w"
                     ) as f:
                         dump(obj=current_data, fp=f, indent=4)
                     # Log snapshot timing
                     self.logger.info(f"Snapshot for {feed} saved at {ctime()}")
 
             # Increment the counter after each iteration
-            task_counter[0] += 1
-            if task_counter[0] >= iterations:
+            task_counter += 1
+            if task_counter >= iterations:
                 # Log when task is stopping
                 self.logger.info(
                     f"Maximum iterations reached for {feed}. Stopping scheduler."
@@ -185,7 +187,7 @@ class GbfsFeed:
         # Graceful shutdown handling with try-except-finally
         try:
             # Start a loop to keep the scheduler running
-            while task_counter[0] < iterations:
+            while task_counter < iterations:
                 # Run the scheduled jobs
                 run_pending()
                 # Sleep for a short duration to prevent high CPU usage
