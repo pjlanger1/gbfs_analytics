@@ -21,12 +21,25 @@ class GBFSManager:
             "toronto": "https://tor.publicbikesystem.net/customer/gbfs/v2/gbfs.json",
         }
 
-    def get_feed(self, city):
-        """Return a gbfs_feed instance for the given city if available."""
+    def get_feed(self, city: str) -> GbfsFeed:
+        """
+        Return a gbfs_feed instance for the given city if available.
+
+        Args:
+            city:
+
+        Returns:
+
+        """
         if city not in self.systems:
             raise ValueError(f"City {city} is not available in the systems list.")
-        return GbfsFeed(city, self.systems[city])
+        return GbfsFeed(sysinit=city, baseurl=self.systems[city])
 
-    def list_available_systems(self):
-        """Return a list of available systems."""
+    def list_available_systems(self) -> list:
+        """
+        Return a list of available systems.
+
+        Returns:
+
+        """
         return list(self.systems.keys())
